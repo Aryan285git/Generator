@@ -1,7 +1,6 @@
 import random
 from faker import Faker
 import pandas as pd
-from openpyxl import load_workbook
 
 fake = Faker()
 
@@ -11,6 +10,7 @@ def generate_record():
         "Start time": fake.date_time_this_year(),
         "Completion time": fake.date_time_this_year(),
         "Email": "anonymous",
+        "Name": fake.first_name(),
         "Full Name": fake.name(),
         "Gender": random.choice(["Man", "Women"]),
         "Date of Birth": fake.date_of_birth(minimum_age=18, maximum_age=80),
@@ -40,34 +40,17 @@ def generate_data(num_records):
     df = pd.DataFrame(data)
     return df
 
-def adjust_column_widths(path):
-    wb = load_workbook(path)
-    ws = wb.active
-
-    for column in ws.columns:
-        max_length = 0
-        column = [cell for cell in column]
-        for cell in column:
-            try:
-                if len(str(cell.value)) > max_length:
-                    max_length = len(str(cell.value))
-            except:
-                pass
-        adjusted_width = (max_length + 2)
-        ws.column_dimensions[column[0].column_letter].width = adjusted_width
-
-    wb.save(path)
-
-# Generate data
 df = generate_data(3000)
 
-# Define output path for a new file
-output_path = 'D:/Projects/College/Generator/output_new.xlsx'
+# Load the template
+template_path = 'D:/Projects/College/Generator/template.xlsx'
+output_path = 'D:/Projects/College/Generator/output.xlsx'
 
-# Write data to a new Excel file
-df.to_excel(output_path, index=False)
-
-# Adjust column widths in the Excel file
-adjust_column_widths(output_path)
+# Append data to the template
+with pd.ExcelWriter(template_path, engine='openpyxl', mode='a', if_sheet_exists='overlay') as writer:
+    # Write data starting from the first empty row
+    book = pd.read_excel(template_path, sheet_name='Sheet1', engine='openpyxl')
+    startrow = book.shape[0]
+    df.to_excel(writer, sheet_name='Sheet1', index=False, startrow=startrow)
 
 print(f"Data successfully written to {output_path}")
