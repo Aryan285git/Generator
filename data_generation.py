@@ -4,7 +4,7 @@ import pandas as pd
 
 fake = Faker()
 
-def generate_record():
+def generate_record(hotels, areas, cities):
     record = {
         "Id": None,
         "Start time": fake.date_time_this_year(),
@@ -17,6 +17,9 @@ def generate_record():
         "Check-out Date": fake.date_this_year(),
         "Purpose of Visit": random.choice(["Business", "Vacation", "Function"]),
         "How did you discover us?": random.choice(["Hotel Booking Site", "Internet Advertisement", "Word of Mouth", "Organization"]),
+        "Hotel Name": random.choice(hotels),
+        "Area": random.choice(areas),
+        "City": random.choice(cities),
         "Feedback.Staff Attitude": random.choice(["Excellent", "Very Good", "Good", "Average", "Poor"]),
         "Feedback.Check-in Process": random.choice(["Excellent", "Very Good", "Good", "Average", "Poor"]),
         "Feedback.Room Service": random.choice(["Excellent", "Very Good", "Good", "Average", "Poor"]),
@@ -31,26 +34,23 @@ def generate_record():
     return record
 
 def generate_data(num_records):
+    hotels = [f"Hotel {i}" for i in range(1, 21)]  # 20 unique hotel names
+    areas = [f"Area {i}" for i in range(1, 8)]  # 7 areas
+    cities = [f"City {i}" for i in range(1, 11)]  # 10 cities
+
     data = []
     for i in range(num_records):
-        record = generate_record()
+        record = generate_record(hotels, areas, cities)
         record["Id"] = i + 1
         data.append(record)
     
     df = pd.DataFrame(data)
     return df
 
+# Generate data
 df = generate_data(3000)
 
-# Load the template
-template_path = 'D:/Projects/College/Generator/template.xlsx'
-output_path = 'D:/Projects/College/Generator/output.xlsx'
-
-# Append data to the template
-with pd.ExcelWriter(template_path, engine='openpyxl', mode='a', if_sheet_exists='overlay') as writer:
-    # Write data starting from the first empty row
-    book = pd.read_excel(template_path, sheet_name='Sheet1', engine='openpyxl')
-    startrow = book.shape[0]
-    df.to_excel(writer, sheet_name='Sheet1', index=False, startrow=startrow)
-
+# Save to Excel
+output_path = 'D:/Projects/College/Generator/output_new.xlsx'
+df.to_excel(output_path, index=False)
 print(f"Data successfully written to {output_path}")
