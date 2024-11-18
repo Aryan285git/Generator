@@ -1,16 +1,44 @@
 import random
 from faker import Faker
 import pandas as pd
-from openpyxl import load_workbook
 
 fake = Faker()
 
-def generate_record():
+# Define sample cities and areas
+cities = [
+    "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai",
+    "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Lucknow"
+]
+areas = [
+    ["Andheri", "Borivali", "Malad", "Dadar", "Kurla"],
+    ["Connaught Place", "Chandni Chowk", "Saket", "Karol Bagh", "Dwarka"],
+    ["Whitefield", "Koramangala", "MG Road", "Indiranagar", "Jayanagar"],
+    ["Banjara Hills", "Gachibowli", "Kukatpally", "Secunderabad", "Hitech City"],
+    ["Adyar", "T. Nagar", "Velachery", "Anna Nagar", "Kodambakkam"],
+    ["Park Street", "Salt Lake", "Howrah", "Esplanade", "Tollygunge"],
+    ["Koregaon Park", "Baner", "Kothrud", "Hinjawadi", "Shivaji Nagar"],
+    ["Navrangpura", "Paldi", "Vastrapur", "Satellite", "Maninagar"],
+    ["C-Scheme", "Malviya Nagar", "Vaishali Nagar", "Amer", "Tonk Road"],
+    ["Hazratganj", "Gomti Nagar", "Aliganj", "Indira Nagar", "Aminabad"]
+]
+
+# Generate a list of hotel names for each area
+def generate_hotel_names():
+    hotel_names = []
+    for i in range(1, random.randint(10, 15)):  # Create 10-15 unique hotels per area
+        hotel_names.append(f"Hotel {fake.unique.word().capitalize()}{i}")
+    return hotel_names
+
+# Generate a single record
+def generate_record(hotel_name, area, city, customer_id):
     record = {
-        "Id": None,
+        "Id": customer_id,
+        "Hotel Name": hotel_name,
+        "Area": area,
+        "City": city,
         "Start time": fake.date_time_this_year(),
         "Completion time": fake.date_time_this_year(),
-        "Email": "anonymous",
+        "Email": fake.email(),
         "Full Name": fake.name(),
         "Gender": random.choice(["Man", "Women"]),
         "Date of Birth": fake.date_of_birth(minimum_age=18, maximum_age=80),
@@ -26,48 +54,28 @@ def generate_record():
         "Feedback.Broadband & TV": random.choice(["Excellent", "Very Good", "Good", "Average", "Poor"]),
         "Feedback.Gym": random.choice(["Excellent", "Very Good", "Good", "Average", "Poor"]),
         "Rate your overall experience in our hotel": random.randint(1, 5),
-        "How likely are you to recommend us to a friend or colleague?": random.randint(1, 10)
+        "How likely are you to recommend us to a friend or colleague?": random.randint(1, 10),
     }
     return record
 
-def generate_data(num_records):
+# Generate data for multiple visits
+def generate_data():
     data = []
-    for i in range(num_records):
-        record = generate_record()
-        record["Id"] = i + 1
-        data.append(record)
-    
-    df = pd.DataFrame(data)
-    return df
+    customer_id = 1
+    for city, city_areas in zip(cities, areas):
+        for area in city_areas:
+            hotel_names = generate_hotel_names()
+            for _ in range(random.randint(50, 80)):  # Number of visits per area
+                hotel_name = random.choice(hotel_names)  # Randomly assign a hotel
+                record = generate_record(hotel_name, area, city, customer_id)
+                data.append(record)
+                customer_id += 1
+    return pd.DataFrame(data)
 
-def adjust_column_widths(path):
-    wb = load_workbook(path)
-    ws = wb.active
+# Generate data and save to file
+df = generate_data()
 
-    for column in ws.columns:
-        max_length = 0
-        column = [cell for cell in column]
-        for cell in column:
-            try:
-                if len(str(cell.value)) > max_length:
-                    max_length = len(str(cell.value))
-            except:
-                pass
-        adjusted_width = (max_length + 2)
-        ws.column_dimensions[column[0].column_letter].width = adjusted_width
-
-    wb.save(path)
-
-# Generate data
-df = generate_data(3000)
-
-# Define output path for a new file
 output_path = 'D:/Projects/College/Generator/output_new.xlsx'
-
-# Write data to a new Excel file
 df.to_excel(output_path, index=False)
-
-# Adjust column widths in the Excel file
-adjust_column_widths(output_path)
 
 print(f"Data successfully written to {output_path}")
