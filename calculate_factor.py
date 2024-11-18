@@ -31,9 +31,9 @@ feedback_mapping = {
 for column in feedback_columns:
     df[column] = df[column].map(feedback_mapping)
 
-# Normalize experience columns to a 5-point scale (if on a 10-point scale)
-df["Rate your overall experience in our hotel"] = df["Rate your overall experience in our hotel"] / 2
-df["How likely are you to recommend us to a friend or colleague?"] = df["How likely are you to recommend us to a friend or colleague?"] / 2
+# Normalize experience columns to a 5-point scale (if already on a different scale)
+df["Rate your overall experience in our hotel"] = df["Rate your overall experience in our hotel"] / df["Rate your overall experience in our hotel"].max() * 5
+df["How likely are you to recommend us to a friend or colleague?"] = df["How likely are you to recommend us to a friend or colleague?"] / df["How likely are you to recommend us to a friend or colleague?"].max() * 5
 
 # Calculate Judging Factor for each visit
 df["Judging Factor"] = (
@@ -41,14 +41,14 @@ df["Judging Factor"] = (
     2 * df[experience_columns].sum(axis=1)  # Add experience scores with weight 2
 )
 
-# Group by 'Hotel Name' and calculate the average Judging Factor for each hotel
-df_grouped = df.groupby(['Hotel Name', 'City', 'Area'], as_index=False)['Judging Factor'].mean()
+# Group by 'Hotel Name', 'City', and 'Area' to calculate metrics
+df_grouped = df.groupby(['Hotel Name', 'City', 'Area'], as_index=False).agg(
+    Judging_Factor=('Judging Factor', 'mean'),  # Average Judging Factor
+    Number_of_Visitors=('Hotel Name', 'count')  # Count of visits
+)
 
-# Select only the required columns
-df_simplified = df_grouped[["Hotel Name", "City", "Area", "Judging Factor"]]
-
-# Save the simplified dataset with average Judging Factor
+# Save the simplified dataset with average Judging Factor and visitor count
 output_file = 'D:/Projects/College/Generator/judging_factor.xlsx'
-df_simplified.to_excel(output_file, index=False)
+df_grouped.to_excel(output_file, index=False)
 
-print(f"Simplified Judging Factor file with averages successfully created: {output_file}")
+print(f"Simplified Judging Factor file with averages and visitor counts successfully created: {output_file}")
