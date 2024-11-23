@@ -75,7 +75,7 @@ def generate_data():
 # Generate data and save to file
 df = generate_data()
 
-output_path = 'D:/Projects/College/Generator/output_new.xlsx'
+output_path = 'output_new.xlsx'
 df.to_excel(output_path, index=False)
 
 print(f"Data successfully written to {output_path}")

@@ -88,7 +88,7 @@ def get_last_month_filter():
         return get_last_month_filter()
 
 # Define input path for the generated data file
-input_path = 'D:/Projects/College/Generator/output_new.xlsx'
+input_path = 'output_new.xlsx'
 
 # Load the data
 df = load_data(input_path)
