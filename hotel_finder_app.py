@@ -5,7 +5,7 @@ import numpy as np
 import streamlit as st
 
 # Load data from the Judging Factor file
-data_file = 'D:/Projects/College/Generator/judging_factor.xlsx'
+data_file = 'judging_factor.xlsx'
 df = pd.read_excel(data_file)
 
 # Function to show options for city and area selection

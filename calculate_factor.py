@@ -48,7 +48,7 @@ df_grouped = df.groupby(['Hotel Name', 'City', 'Area'], as_index=False).agg(
 )
 
 # Save the simplified dataset with average Judging Factor and visitor count
-output_file = 'D:/Projects/College/Generator/judging_factor.xlsx'
+output_file = 'judging_factor.xlsx'
 df_grouped.to_excel(output_file, index=False)
 
 print(f"Simplified Judging Factor file with averages and visitor counts successfully created: {output_file}")
